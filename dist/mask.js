@@ -1,7 +1,7 @@
 /*!
  * angular-ui-mask
  * https://github.com/angular-ui/ui-mask
- * Version: 1.6.7 - 2015-12-30T03:32:53.475Z
+ * Version: 1.7.0 - 2016-01-05T17:54:51.501Z
  * License: MIT
  */
 
@@ -19,6 +19,7 @@ angular.module('ui.mask', [])
                 '*': /[a-zA-Z0-9]/
             },
             clearOnBlur: true,
+            partialValue: false,
             eventsToHandle: ['input', 'keyup', 'click', 'focus']
         })
         .directive('uiMask', ['uiMaskConfig', function(maskConfig) {
@@ -102,7 +103,7 @@ angular.module('ui.mask', [])
                                 value = unmaskValue(fromModelValue || '');
                                 isValid = validateValue(value);
                                 controller.$setValidity('mask', isValid);
-                                return isValid && value.length ? maskValue(value) : undefined;
+                                return (linkOptions.partialValue || isValid) && value.length ? maskValue(value) : undefined;
                             }
 
                             function parser(fromViewValue) {
@@ -117,7 +118,7 @@ angular.module('ui.mask', [])
                                 // to be out-of-sync with what the controller's $viewValue is set to.
                                 controller.$viewValue = value.length ? maskValue(value) : '';
                                 controller.$setValidity('mask', isValid);
-                                if (isValid) {
+                                if (linkOptions.partialValue || isValid) {
                                     return modelViewValue ? controller.$viewValue : value;
                                 } else {
                                     return undefined;
