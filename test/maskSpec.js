@@ -495,6 +495,108 @@ describe("uiMask", function () {
     });
   });
 
+  describe("partial-value", function() {
+    it("should return empty when no empty string", function() {
+      var placeholderHtml = "<input name='input' ng-model='x' ui-mask='{{mask}}' ui-options='{partialValue: true}'>",
+          input           = compileElement(placeholderHtml);
+
+      scope.$apply("x = ''");
+      scope.$apply("mask = '(999) 999-9999'");
+      input.triggerHandler("input");
+      expect(input.val()).toBe("(___) ___-____");
+      expect(scope.x).toBe("");
+    });
+
+    it("should return partial value model when is invalid", function() {
+      var placeholderHtml = "<input name='input' ng-model='x' ui-mask='{{mask}}' ui-options='{partialValue: true}'>",
+          input           = compileElement(placeholderHtml);
+
+      scope.$apply("x = ''");
+      scope.$apply("mask = '(999) 999-9999'");
+      input.val("65052").triggerHandler("input");
+      expect(input.val()).toBe("(650) 52_-____");
+      expect(scope.x).toBe("65052");
+    });
+
+    it("should return full value model when is valid", function() {
+      var placeholderHtml = "<input name='input' ng-model='x' ui-mask='{{mask}}' ui-options='{partialValue: true}'>",
+          input           = compileElement(placeholderHtml);
+
+      scope.$apply("x = ''");
+      scope.$apply("mask = '(999) 999-9999'");
+      input.val("6505265486").triggerHandler("input");
+      expect(input.val()).toBe("(650) 526-5486");
+      expect(scope.x).toBe("6505265486");
+    });
+
+    it("should return trimed value model when input is larger than the mask", function() {
+      var placeholderHtml = "<input name='input' ng-model='x' ui-mask='{{mask}}' ui-options='{partialValue: true}'>",
+          input           = compileElement(placeholderHtml);
+
+      scope.$apply("x = ''");
+      scope.$apply("mask = '(999) 999-9999'");
+      input.val("65052654860000").triggerHandler("input");
+      expect(input.val()).toBe("(650) 526-5486");
+      expect(scope.x).toBe("6505265486");
+    });
+
+    it("should still return partial value when mask change", function() {
+      var placeholderHtml = "<input name='input' ng-model='x' ui-mask='{{mask}}' ui-options='{partialValue: true}'>",
+          input           = compileElement(placeholderHtml);
+
+      scope.$apply("x = ''");
+      scope.$apply("mask = '(999) 999-9999'");
+      input.val("65052").triggerHandler("input");
+      expect(input.val()).toBe("(650) 52_-____");
+      expect(scope.x).toBe("65052");
+
+      scope.$apply("mask = '99 9999 9999'");
+      expect(input.val()).toBe("65 052_ ____");
+      expect(scope.x).toBe("65052");
+    });
+
+    it("should return partial value when ui-mask-placeholder is set", function() {
+      var placeholderHtml = "<input name='input' ng-model='x' ui-mask='{{mask}}' placeholder='{{placeholder}}' ui-options='{partialValue: true}'>",
+          input           = compileElement(placeholderHtml);
+
+      scope.$apply("x = ''");
+      scope.$apply("mask = '99/99/9999'");
+      scope.$apply("placeholder = 'DD/MM/YYYY'");
+
+      input.val("12").triggerHandler("input");
+      expect(input.val()).toBe("12/MM/YYYY");
+      expect(scope.x).toBe("12");
+    });
+
+    it("should return partial value when ui-mask-placeholder is set", function() {
+      var placeholderHtml = "<input name='input' ng-model='x' ui-mask='{{mask}}' model-view-value='true' ui-options='{partialValue: true}'>",
+          input           = compileElement(placeholderHtml);
+
+      scope.$apply("x = ''");
+      scope.$apply("mask = '99/99/9999'");
+
+      input.val("12").triggerHandler("input");
+      expect(input.val()).toBe("12/__/____");
+      expect(scope.x).toBe("12/__/____");
+    });
+
+    // it("should clear an invalid value from the input when blured", function() {
+    //   var placeholderHtml = "<input name='input' ng-model='x' ui-mask='{{mask}}' ui-options='{partialValue: true}'>",
+    //       input           = compileElement(placeholderHtml);
+
+    //   scope.$apply("x = ''");
+    //   scope.$apply("mask = '(999) 999-9999'");
+
+    //   input.val("65052").triggerHandler("input");
+    //   expect(input.val()).toBe("(650) 52_-____");
+    //   expect(scope.x).toBe("65052");
+
+    //   input.triggerHandler("blur");
+    //   expect(input.val()).toBe("");
+    //   expect(scope.x).toBe("");
+    // });
+  });
+
   describe("configuration", function () {
     it("should accept the new mask definition set globally", function() {
       config.maskDefinitions["@"] = /[fz]/;
